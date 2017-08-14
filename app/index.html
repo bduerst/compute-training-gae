@@ -1,0 +1,277 @@
+<!doctype html>
+<!--
+  Copyright 2017 Google Inc. All rights reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License
+-->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="A front-end template that helps you build fast, modern mobile web apps.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Material Design Lite</title>
+
+    <!-- Add to homescreen for Chrome on Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="icon" sizes="192x192" href="/img/touch/chrome-touch-icon-192x192.png">
+
+    <!-- Add to homescreen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Material Design Lite">
+    <link rel="apple-touch-icon-precomposed" href="apple-touch-icon-precomposed.png">
+
+    <!-- Tile icon for Win8 (144x144 + tile color) -->
+    <meta name="msapplication-TileImage" content="/img/touch/ms-touch-icon-144x144-precomposed.png">
+    <meta name="msapplication-TileColor" content="#3372DF">
+
+    <!-- SEO: If your mobile URL is different from the desktop URL, add a canonical link to the desktop page https://developers.google.com/webmasters/smartphone-sites/feature-phones -->
+    <!--
+    <link rel="canonical" href="http://www.example.com/">
+    -->
+
+    <link rel="stylesheet" href="/bower_components/material-design-lite/material.min.css">
+    <script src="/bower_components/material-design-lite/material.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        .demo-card-square.mdl-card {
+            width: 320px;
+            height: 320px;
+            margin: 12px;
+            float: left;
+        }
+
+        .demo-card-square > .mdl-card__title {
+            color: #888;
+        }
+
+        .mdl-button--controls {
+            float: right;
+            padding: 5px;
+            margin-right: 30px;
+        }
+
+        #show-dialog {
+            position: absolute;
+            right: 25px;
+            bottom: 25px;
+            z-index: 100;
+        }
+
+        .mdl-dialog {
+            width: 500px;
+            height: 260px;
+        }
+
+        #file {
+            display: none
+        }
+
+        #upload-form {
+            width: 100%;
+        }
+
+        .mdl-textfield__input {
+            box-sizing: border-box;
+            width: calc(100% - 120px);
+            float: left;
+        }
+    </style>
+</head>
+<body>
+
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+            <!-- Title -->
+            <span class="mdl-layout-title">Google Cloud | Compute Training</span>
+            <!-- Add spacer, to align navigation to the right -->
+            <div class="mdl-layout-spacer"></div>
+            <!-- Navigation. We hide it in small screens. -->
+            <nav id="show-dialogue" class="mdl-navigation mdl-layout--large-screen-only">
+                <a id="show-dialogue" class="mdl-navigation__link" href="">Some Link Here</a>
+            </nav>
+        </div>
+    </header>
+    <div class="mdl-layout__drawer">
+        <span class="mdl-layout-title">Title</span>
+        <nav class="mdl-navigation">
+            <a id="show-dialogue" class="mdl-navigation__link" href="">Add Image</a>
+        </nav>
+    </div>
+    <main class="mdl-layout__content">
+        <div class="page-content">
+
+            <dialog class="mdl-dialog">
+                <h4 class="mdl-dialog__title">Upload Image</h4>
+                <div class="mdl-dialog__content">
+                    <p>
+                        Please upload an image to use with the Vision API. Try to keep it < 2MB in size if
+                        possible.
+                    </p>
+                </div>
+                <div class="mdl-dialog__actions">
+                    <form id="upload-form" action="{0}" method="POST" enctype="multipart/form-data">
+                        <input type="file" id="file" name="file">
+                        <div>
+                            <input class="mdl-textfield__input" placeholder="File" type="text" id="uploadFile"
+                                   readonly/>
+
+                            <div style="float:left;"><label id="uploadBtn" for="file"
+                                                            class="pick-file mdl-button mdl-js-button mdl-button--colored">
+                                Pick File
+                            </label>
+                            </div>
+                        </div>
+                        <button type="submit" name="submit" id="submit-button"
+                                class="mdl-button mdl-js-button mdl-button--colored mdl-button--controls submit"
+                                disabled>Submit
+                        </button>
+                        <button type="button"
+                                class="mdl-button mdl-js-button mdl-button--colored mdl-button--controls close">Close
+                        </button>
+                    </form>
+
+                </div>
+            </dialog>
+
+            <div id="container"/></div>
+            <!-- Colored FAB button -->
+            <button id="show-dialog" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
+                <i class="material-icons">add</i>
+            </button>
+
+        </div>
+    </main>
+</div>
+
+</body>
+<script>
+    //  Add click events to each hyperlinks - TODO Deprecate?
+    Array.prototype.forEach.call(document.querySelectorAll('.mdl-card__media'), function (el) {
+        var link = el.querySelector('a');
+        if (!link) {
+            return;
+        }
+        var target = link.getAttribute('href');
+        if (!target) {
+            return;
+        }
+        el.addEventListener('click', function () {
+            location.href = target;
+        });
+    });
+
+    // Upload Image File - Dialogue Controls
+    var dialog = document.querySelector('dialog');
+    var showDialogButton = document.querySelector('#show-dialog');
+    if (!dialog.showModal) {
+        dialogPolyfill.registerDialog(dialog);
+    }
+    showDialogButton.addEventListener('click', function () {
+        dialog.showModal();
+    });
+    dialog.querySelector('.close').addEventListener('click', function () {
+        dialog.close();
+    });
+
+    // Upload Image File - File Controls to enable Submission button
+    document.getElementById("file").onchange = function () {
+        if (this.files[0].name !== true && this.files[0].name !== null) {
+            document.getElementById("uploadFile").value = this.files[0].name;
+            document.getElementById('submit-button').MaterialButton.enable()
+        }
+    };
+
+
+    function init() {
+
+        if (window.location.host.indexOf("localhost") > -1) {
+            var ROOT = '//' + window.location.host + '/_ah/api'
+        } else {
+            var ROOT = 'http://' + window.location.host + '/_ah/api'
+        }
+        console.log("Loading root: " + ROOT);
+        // Load the Google API
+        gapi.client.load(
+            'computeTraining',
+            'v1',
+            function () {
+                //  Boot any methods for after apis load
+                window.postInitiation();
+            },
+            ROOT
+        );
+    }
+
+
+    //  Load Google APIs to communicate with App Engine Endpoints
+    window.postInitiation = function () {
+        console.log("Api pinged successfully")
+        console.log(gapi);
+
+        // Get a list of all the uploaded images
+        gapi.client.computeTraining.images.list().execute(function (resp) {
+            console.log(resp);
+            generateCards(resp.items)
+        });
+
+        // Get blobstore upload URL for adding new images
+        gapi.client.computeTraining.blobstore.getUrl().execute(function (resp) {
+            console.log(resp)
+            document.getElementById("upload-form").action = resp['url'];
+        });
+    }
+
+    // Generate cards for each of the images from datastore
+    generateCards = function (list) {
+        i = 0;
+        for (; list[i];) {
+            console.log(list[i]);
+
+            // Parse out data
+            var card = document.createElement('div');
+            card.className = 'demo-card-square mdl-card mdl-shadow--2dp';
+
+            var title = document.createElement('div');
+            title.className = 'mdl-card__title mdl-card--expand';
+            title.style = "background: url('.." + list[i].img_url + "') bottom right 15% no-repeat;';"
+
+            var heading = document.createElement('h2');
+            heading.className = 'mdl-card__title-text';
+
+            var characteristics = document.createElement('div');
+            characteristics.className = 'mdl-card__supporting-text';
+
+            var titleText = document.createTextNode(list[i].filename);
+            var characteristicsText = document.createTextNode((list[i].characteristics.join(", ")))
+
+            // Put it all together
+            heading.appendChild(titleText);
+            title.appendChild(heading);
+            characteristics.appendChild(characteristicsText);
+            card.appendChild(title);
+            card.appendChild(characteristics);
+
+            // Add to dom
+            componentHandler.upgradeElement(card);
+            document.getElementById('container').appendChild(card);
+
+            i++;
+        }
+    };
+
+</script>
+<script src="https://apis.google.com/js/client.js?onload=init"></script>
+</html>
