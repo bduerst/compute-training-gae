@@ -87,7 +87,16 @@
             width: calc(100% - 120px);
             float: left;
         }
+
+        .mdl-switch.is-checked .mdl-switch__thumb{
+            background:rgb(250,250,250) !important;
+        }
+
+        .mdl-switch.is-checked .mdl-switch__track{
+            background:rgba(0,0,0,.26) !important;
+        }
     </style>
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-deep_orange.min.css" />
 </head>
 <body>
 
@@ -99,9 +108,19 @@
             <!-- Add spacer, to align navigation to the right -->
             <div class="mdl-layout-spacer"></div>
             <!-- Navigation. We hide it in small screens. -->
-            <nav id="show-dialogue" class="mdl-navigation mdl-layout--large-screen-only">
-                <a id="show-dialogue" class="mdl-navigation__link" href="">Some Link Here</a>
-            </nav>
+         
+<span class="mdl-layout__tab">Instant</span>
+
+<div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
+                  mdl-textfield--floating-label mdl-textfield--align-right">
+           <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="switch-1">
+  <input type="checkbox" id="switch-1" class="mdl-switch__input">
+  <span class="mdl-switch__label"></span>
+</label>
+      </div>
+<span class="mdl-layout__tab">Deferred</span>
+
+            
         </div>
     </header>
     <div class="mdl-layout__drawer">
