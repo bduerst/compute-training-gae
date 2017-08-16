@@ -44,6 +44,8 @@
     <link rel="stylesheet" href="/bower_components/material-design-lite/material.min.css">
     <script src="/bower_components/material-design-lite/material.min.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-deep_orange.min.css"/>
+
     <style>
         .demo-card-square.mdl-card {
             width: 320px;
@@ -88,15 +90,14 @@
             float: left;
         }
 
-        .mdl-switch.is-checked .mdl-switch__thumb{
-            background:rgb(250,250,250) !important;
+        .mdl-switch.is-checked .mdl-switch__thumb {
+            background: rgb(250, 250, 250) !important;
         }
 
-        .mdl-switch.is-checked .mdl-switch__track{
-            background:rgba(0,0,0,.26) !important;
+        .mdl-switch.is-checked .mdl-switch__track {
+            background: rgba(0, 0, 0, .26) !important;
         }
     </style>
-    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-deep_orange.min.css" />
 </head>
 <body>
 
@@ -108,23 +109,26 @@
             <!-- Add spacer, to align navigation to the right -->
             <div class="mdl-layout-spacer"></div>
             <!-- Navigation. We hide it in small screens. -->
-         
-<span class="mdl-layout__tab">Instant</span>
 
-<div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
+            <span class="mdl-layout__tab">Instant</span>
+
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
                   mdl-textfield--floating-label mdl-textfield--align-right">
-           <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="switch-1">
-  <input type="checkbox" id="switch-1" class="mdl-switch__input">
-  <span class="mdl-switch__label"></span>
-</label>
-      </div>
-<span class="mdl-layout__tab">Deferred</span>
+                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="switch-1">
+                    <input type="checkbox" id="switch-1" class="mdl-switch__input">
+                    <span class="mdl-switch__label"></span>
+                </label>
+            </div>
+            <span class="mdl-layout__tab">Deferred</span>
 
-            
+
         </div>
     </header>
     <div class="mdl-layout__drawer">
-        <span class="mdl-layout-title">Title</span>
+        <span class="mdl-layout-title">Cat or Not a Cat</span>
+        <nav class="mdl-navigation">
+           This app will tell you if you have a cat (or not) in your photo.
+        </nav>
         <nav class="mdl-navigation">
             <a id="show-dialogue" class="mdl-navigation__link" href="">Add Image</a>
         </nav>
@@ -165,14 +169,15 @@
                 </div>
             </dialog>
 
-            <div id="container"/></div>
-            <!-- Colored FAB button -->
-            <button id="show-dialog" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
-                <i class="material-icons">add</i>
-            </button>
-
+            <div id="container"/>
         </div>
-    </main>
+        <!-- Colored FAB button -->
+        <button id="show-dialog" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
+            <i class="material-icons">add</i>
+        </button>
+
+</div>
+</main>
 </div>
 
 </body>
@@ -216,12 +221,18 @@
 
     function init() {
 
+        // Callback URL for ROOT with gapi
         if (window.location.host.indexOf("localhost") > -1) {
+            // For dev server running on localhost - needs special localhost link
             var ROOT = '//' + window.location.host + '/_ah/api'
+        } else if (window.location.host.indexOf("127.0.0.1") > -1) {
+            // For dev server running on 127.0.0.1, needs http, not https
+            var ROOT = 'http://' + window.location.host + '/_ah/api'
         } else {
+            // For production use https else will fail gapi call
             var ROOT = 'https://' + window.location.host + '/_ah/api'
         }
-        console.log("Loading root: " + ROOT);
+
         // Load the Google API
         gapi.client.load(
             'computeTraining',
