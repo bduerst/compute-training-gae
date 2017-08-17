@@ -16,7 +16,7 @@ class VisionApi(object):
             'vision', 'v1', credentials=credentials,
             discoveryServiceUrl=DISCOVERY_URL)
 
-    def detect_labels(self, images, max_results=5, num_retries=3):
+    def detect_labels(self, images, max_results=10, num_retries=3):
         """Uses the Vision API to detect text in the given file.
         """
 

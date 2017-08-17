@@ -45,7 +45,7 @@ class ComputeTrainingApi(remote.Service):
         name='images.list')
     def listImages(self, unused_request):
         # images = ImageUpload.query();
-        imageQuery = ImageUpload.query()
+        imageQuery = ImageUpload.query().order(-ImageUpload.date_created)
         images = []
         for image in imageQuery:
             images.append(Image(
