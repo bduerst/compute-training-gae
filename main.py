@@ -29,7 +29,8 @@ class MainHandler(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
     ('/upload', blobstore.PhotoUploadFormHandler),
     ('/upload_photo', blobstore.PhotoUploadHandler),
-    ('/img', blobstore.Thumbnailer)
+    ('/img', blobstore.Thumbnailer),
+    ('/fullimg', blobstore.ImageLoader)
 ], debug=True)
 
 """ Route API requests to API """

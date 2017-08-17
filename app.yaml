@@ -27,6 +27,9 @@ handlers:
 - url: /img
   script: main.app
 
+- url: /fullimg
+  script: main.app
+
 # Most Traffic
 - url: /(.+)
   static_files: app/\1
