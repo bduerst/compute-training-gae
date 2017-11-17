@@ -107,6 +107,21 @@
             z-index: -1;
         }
 
+        .delete-icon{
+            position: absolute;
+            right:0;
+            font-size: 30px;
+            color: #F5F5F5;
+            opacity: 0.4;
+            padding: 16px;
+            z-index: 10;
+        }
+
+        .delete-icon:hover{
+            opacity: 1;
+            cursor: pointer;
+        }
+
         .card-emoji {
             position: absolute;
             right: 10px;
@@ -280,12 +295,22 @@
         console.log("Api pinged successfully")
         console.log(gapi);
 
-        // Get blobstore upload URL for adding new images
+                // Get blobstore upload URL for adding new images
         gapi.client.computeTraining.blobstore.getUrl().execute(function (resp) {
             console.log("Blobstore upload url:")
             console.log(resp)
             document.getElementById("upload-form").action = resp['url'];
         });
+
+        render();
+    };
+
+    // Render all of the image cards
+    render = function(waitTime=0) {
+
+        // Get the spinner for control
+        var spinner = document.getElementById("spinner-container");
+        spinner.style.display = 'block';
 
         // Get a list of all the uploaded images
         gapi.client.computeTraining.images.list().execute(function (resp) {
@@ -299,7 +324,17 @@
                 generateCards(resp.items);
             }
         });
-    }
+    };
+
+    deleteCard = function(evt){
+        var id = evt.target.idParam;
+            gapi.client.computeTraining.images.delete({
+                    'id':id
+                }).execute(function() {
+                    var card = document.getElementById(id);
+                    card.style.display = 'none';
+                })
+        };
 
     // Generate cards for each of the images from datastore
     generateCards = function (list) {
@@ -310,6 +345,7 @@
             // Parse out data
             var card = document.createElement('div');
             card.className = 'demo-card-square mdl-card mdl-shadow--2dp';
+            card.id = list[i].id;
 
             var title = document.createElement('div');
             title.className = 'mdl-card__title mdl-card--expand';
@@ -329,6 +365,12 @@
             var titleText = document.createTextNode(list[i].filename);
             var characteristicsText = document.createTextNode((list[i].characteristics.join(", ")));
 
+            var deleteIcon = document.createElement('i');
+            deleteIcon.className = 'material-icons delete-icon';
+            deleteIcon.id = 'delete-'+list[i].id;
+            var deleteIconText = document.createTextNode('close');
+            deleteIcon.appendChild(deleteIconText);
+            console.log(deleteIcon.id)
 
             var emoji = document.createElement('img');
             emoji.className = 'card-emoji';
@@ -361,13 +403,26 @@
             characteristics.appendChild(characteristicsText);
             card.appendChild(title);
             card.appendChild(characteristics);
+            card.appendChild(deleteIcon);
+
 
             // Add to dom
             componentHandler.upgradeElement(card);
             document.getElementById('container').appendChild(card);
 
+            // Add the delete event listeners
+            var listId = list[i].id;
+            var icon = document.querySelector('#delete-'+listId);
+            console.log(icon);
+
+            icon.addEventListener('click', deleteCard, listId);
+            icon.idParam = listId;
+
+            // Cycle to next image
             i++;
-        }
+        };
+
+
     };
 
 </script>

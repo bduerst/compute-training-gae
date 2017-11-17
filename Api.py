@@ -6,6 +6,8 @@ from protorpc import remote
 from google.appengine.ext import blobstore
 from blobstore import ImageUpload
 
+import logging
+
 
 class Image(messages.Message):
     filename = messages.StringField(1)
@@ -13,16 +15,15 @@ class Image(messages.Message):
     img_url = messages.StringField(3)
     characteristics = messages.StringField(4, repeated=True)
     date_created = messages.StringField(5)
+    id = messages.IntegerField(6)
 
 
 class ImageCollection(messages.Message):
     items = messages.MessageField(Image, 1, repeated=True)
 
 
-STORED_IMAGES = ImageCollection(items=[
-    Image(filename='hello world!'),
-    Image(filename='goodbye world!'),
-])
+class ImageKey(messages.Message):
+    id = messages.StringField(1)
 
 
 class BlobstoreUploadURL(messages.Message):
@@ -53,11 +54,29 @@ class ComputeTrainingApi(remote.Service):
                 blob_key=str(image.blob_key),
                 img_url=image.img_url,
                 characteristics=image.characteristics,
-                date_created=str(image.date_created)
+                date_created=str(image.date_created),
+                id=image.key.id()
             ))
         return ImageCollection(items=images)
 
-    # Get the list of Images uploaded for display
+
+    # Delete an image from database
+    @endpoints.method(
+        ImageKey,
+        ImageKey,
+        path='delete',
+        http_method='POST',
+        name='images.delete')
+    def deleteImages(self, request):
+        # images = ImageUpload.query();
+        id = int(request.id)
+        imageKey = ImageUpload.get_by_id(id).key
+        logging.info('Deleting Image with ID: '+request.id)
+        imageKey.delete()
+        return request
+
+
+    # Get a blobstore upload url for new images
     @endpoints.method(
         message_types.VoidMessage,
         BlobstoreUploadURL,
