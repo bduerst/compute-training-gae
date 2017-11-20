@@ -38,6 +38,8 @@
 
     <link rel="stylesheet" href="/bower_components/material-design-lite/material.min.css">
     <script src="/bower_components/material-design-lite/material.min.js"></script>
+    <link rel="stylesheet" href="/bower_components/material-design-lite/mdl-selectfield/mdl-selectfield.min.css">
+    <script src="/bower_components/material-design-lite/mdl-selectfield/mdl-selectfield.min.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-deep_orange.min.css"/>
 
@@ -80,10 +82,14 @@
             width: 100%;
         }
 
-        .mdl-textfield__input {
+        .image-input {
             box-sizing: border-box;
             width: calc(100% - 120px);
             float: left;
+        }
+
+        .logging {
+            width: 100%;
         }
 
         .mdl-switch.is-checked .mdl-switch__thumb {
@@ -107,9 +113,9 @@
             z-index: -1;
         }
 
-        .delete-icon{
+        .delete-icon {
             position: absolute;
-            right:0;
+            right: 0;
             font-size: 30px;
             color: #F5F5F5;
             opacity: 0.4;
@@ -117,7 +123,7 @@
             z-index: 10;
         }
 
-        .delete-icon:hover{
+        .delete-icon:hover {
             opacity: 1;
             cursor: pointer;
         }
@@ -165,8 +171,10 @@
 
         </nav>
         <nav id="show-dialog-nav" class="mdl-navigation" style="cursor:pointer;">
-            <span class="mdl-navigation__link"
-            >Add a Photo</span>
+            <span class="mdl-navigation__link">Add a Photo</span>
+        </nav>
+        <nav id="show-logging-nav" class="mdl-navigation" style="cursor:pointer;">
+            <a class="mdl-navigation__link">Log a Message</a>
         </nav>
         <nav class="mdl-navigation">
             <a class="mdl-navigation__link" target="_blank"
@@ -176,7 +184,7 @@
     <main class="mdl-layout__content">
         <div class="page-content">
 
-            <dialog class="mdl-dialog">
+            <dialog id="image-dialog" class="mdl-dialog">
                 <h4 class="mdl-dialog__title">Upload Image</h4>
                 <div class="mdl-dialog__content">
                     <p>
@@ -188,7 +196,8 @@
                     <form id="upload-form" action="{0}" method="POST" enctype="multipart/form-data">
                         <input type="file" id="file" name="file">
                         <div>
-                            <input class="mdl-textfield__input" placeholder="File" type="text" id="uploadFile"
+                            <input class="mdl-textfield__input image-input" placeholder="File" type="text"
+                                   id="uploadFile"
                                    readonly/>
 
                             <div style="float:left;"><label id="uploadBtn" for="file"
@@ -197,15 +206,53 @@
                             </label>
                             </div>
                         </div>
+                        <input id="switch-2" name="deferred" type="checkbox" hidden>
                         <button type="submit" name="submit" id="submit-button"
                                 class="mdl-button mdl-js-button mdl-button--colored mdl-button--controls submit"
                                 disabled>Submit
                         </button>
-                        <button type="button"
+                        <button type="button" id="close-image-dialog"
                                 class="mdl-button mdl-js-button mdl-button--colored mdl-button--controls close">Close
                         </button>
                     </form>
 
+                </div>
+            </dialog>
+
+
+            <dialog id="logging-dialog" class="mdl-dialog" style="height:285px;">
+                <h4 class="mdl-dialog__title">Log a Message</h4>
+                <div class="mdl-dialog__content" style="padding-bottom:10px;">
+                    <p style="margin:0px;">
+                        Select a level and enter a message to send to Stack Driver for logging.
+                    </p>
+                </div>
+                <div class="mdl-dialog__actions">
+                    <form>
+                        <div class="mdl-textfield mdl-js-textfield" style="width:100%;">
+                            <textarea class="mdl-textfield__input" type="text" rows="3"
+                                      id="log-message-field"></textarea>
+                            <label class="mdl-textfield__label" for="log-message-field">Message to log...</label>
+                        </div>
+                        <div class="mdl-selectfield mdl-js-selectfield mdl-selectfield--floating-label"
+                             style="width:150px;">
+                            <select class="mdl-selectfield__select" id="logging-level" name="level">
+                                <option value="3">Info</option>
+                                <option value="2">Warning</option>
+                                <option value="1">Error</option>
+                                <option value="0">Critical</option>
+                            </select>
+                            <label class="mdl-selectfield__label" for="logging-level">Logging Level</label>
+                        </div>
+                        <button type="submit" name="submit" id="logging-submit-button"
+                                class="mdl-button mdl-js-button mdl-button--colored mdl-button--controls submit"
+                                id="logging-submit">Submit
+                        </button>
+                        <button type="button" id="close-logging-dialog"
+                                class="mdl-button mdl-js-button mdl-button--colored mdl-button--controls close">Close
+                        </button>
+
+                    </form>
                 </div>
             </dialog>
 
@@ -230,16 +277,35 @@
 </body>
 <script>
 
+    // Link the instant/deferred checkbox to the form's checkbox
+    var checkboxVisible = document.querySelector('#switch-1');
+    var checkboxInvisible = document.querySelector('#switch-2');
+    var setting = getCookie("setting");
+    if (setting === "true") {
+        checkboxVisible.checked = true;
+        checkboxInvisible.checked = true;
+    } else if (setting === "false") {
+        checkboxVisible.checked = false;
+        checkboxInvisible.checked = false;
+    }
+    else {
+        setCookie("setting", false, 365);
+    }
+    checkboxVisible.addEventListener('click', function () {
+        checkboxInvisible.checked = checkboxVisible.checked;
+        cookieStorage = checkboxVisible.checked;
+        setCookie("setting", checkboxVisible.checked, 365);
+    });
+
     // Upload Image File - Dialogue Controls
-    var dialog = document.querySelector('dialog');
+    var dialog = document.querySelector('#image-dialog');
     var showDialognav = document.querySelector('#show-dialog-nav');
     var showDialogButton = document.querySelector('#show-dialog');
-
     if (!dialog.showModal) {
         dialogPolyfill.registerDialog(dialog);
     }
 
-    // Open the dialog
+    // Open the image dialog
     showDialognav.addEventListener('click', function () {
         dialog.showModal();
     });
@@ -247,14 +313,14 @@
         dialog.showModal();
     });
 
-    // Close the dialog
-    dialog.querySelector('.close').addEventListener('click', function () {
+    // Close the image dialog
+    dialog.querySelector('#close-image-dialog').addEventListener('click', function () {
         dialog.close();
         document.getElementById("uploadFile").value = null;
         document.getElementById('submit-button').MaterialButton.disable()
     });
 
-    // Upload Image File - File Controls to enable Submission button
+    // Upload Image File - Only allow upload when file is selected
     document.getElementById("file").onchange = function () {
         if (this.files[0].name !== true && this.files[0].name !== null) {
             document.getElementById("uploadFile").value = this.files[0].name;
@@ -262,7 +328,34 @@
         }
     };
 
+    // Open the Logging dialog
+    var loggingDialog = document.getElementById('logging-dialog');
+    var showLoggingnav = document.getElementById('show-logging-nav');
+    showLoggingnav.addEventListener('click', function () {
+        loggingDialog.showModal();
+    });
 
+    // Close the logging dialog
+    document.getElementById('close-logging-dialog').addEventListener('click', function () {
+        loggingDialog.close();
+        document.getElementById("uploadFile").value = null;
+        //document.getElementById('logging-submit-button').MaterialButton.disable()
+    });
+
+    // Submit logging message
+    document.getElementById('logging-submit-button').addEventListener('click', function () {
+        var levelDiv = document.getElementById('logging-level');
+        var level = levelDiv.options[levelDiv.selectedIndex].value;
+        var message = document.getElementById('log-message-field').value;
+        gapi.client.computeTraining.logging.put({
+            'level': level,
+            'message': message
+        }).execute(function (resp) {
+            console.log(resp)
+        })
+    });
+
+    //  Functions to run at start
     function init() {
 
         // Callback URL for ROOT with gapi
@@ -295,7 +388,7 @@
         console.log("Api pinged successfully")
         console.log(gapi);
 
-                // Get blobstore upload URL for adding new images
+        // Get blobstore upload URL for adding new images
         gapi.client.computeTraining.blobstore.getUrl().execute(function (resp) {
             console.log("Blobstore upload url:")
             console.log(resp)
@@ -306,7 +399,7 @@
     };
 
     // Render all of the image cards
-    render = function(waitTime=0) {
+    render = function (waitTime=0) {
 
         // Get the spinner for control
         var spinner = document.getElementById("spinner-container");
@@ -326,15 +419,15 @@
         });
     };
 
-    deleteCard = function(evt){
+    deleteCard = function (evt) {
         var id = evt.target.idParam;
-            gapi.client.computeTraining.images.delete({
-                    'id':id
-                }).execute(function() {
-                    var card = document.getElementById(id);
-                    card.style.display = 'none';
-                })
-        };
+        gapi.client.computeTraining.images.delete({
+            'id': id
+        }).execute(function () {
+            var card = document.getElementById(id);
+            card.style.display = 'none';
+        })
+    };
 
     // Generate cards for each of the images from datastore
     generateCards = function (list) {
@@ -367,7 +460,7 @@
 
             var deleteIcon = document.createElement('i');
             deleteIcon.className = 'material-icons delete-icon';
-            deleteIcon.id = 'delete-'+list[i].id;
+            deleteIcon.id = 'delete-' + list[i].id;
             var deleteIconText = document.createTextNode('close');
             deleteIcon.appendChild(deleteIconText);
             console.log(deleteIcon.id)
@@ -412,7 +505,7 @@
 
             // Add the delete event listeners
             var listId = list[i].id;
-            var icon = document.querySelector('#delete-'+listId);
+            var icon = document.querySelector('#delete-' + listId);
             console.log(icon);
 
             icon.addEventListener('click', deleteCard, listId);
@@ -420,10 +513,35 @@
 
             // Cycle to next image
             i++;
-        };
+        }
+        ;
 
 
     };
+
+    // Cookie functions for storing values across page loads
+    function setCookie(cname, cvalue, exdays) {
+        var d = new Date();
+        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+        var expires = "expires=" + d.toUTCString();
+        document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+
+    function getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
 
 </script>
 <script src="https://apis.google.com/js/client.js?onload=init"></script>

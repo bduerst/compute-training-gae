@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2007 Google Inc.
+# Copyright 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import webapp2
 import blobstore
 import endpoints
 import Api
-
+import Tasks
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -35,3 +35,4 @@ app = webapp2.WSGIApplication([
 
 """ Route API requests to API """
 api = endpoints.api_server([Api.ComputeTrainingApi])
+

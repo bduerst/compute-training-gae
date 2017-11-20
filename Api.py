@@ -1,3 +1,17 @@
+# Copyright 2017 Google Inc. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import endpoints
 from protorpc import messages
 from protorpc import message_types
@@ -28,6 +42,11 @@ class ImageKey(messages.Message):
 
 class BlobstoreUploadURL(messages.Message):
     url = messages.StringField(1)
+
+
+class LogMessage(messages.Message):
+    message = messages.StringField(1)
+    level = messages.IntegerField(2)
 
 
 @endpoints.api(name="computeTraining",
@@ -71,7 +90,9 @@ class ComputeTrainingApi(remote.Service):
         # images = ImageUpload.query();
         id = int(request.id)
         imageKey = ImageUpload.get_by_id(id).key
-        logging.info('Deleting Image with ID: '+request.id)
+        logging.debug('Deleting Image with ID: '+request.id)
+        blob = blobstore.get(imageKey.get().blob_key)
+        blob.delete()
         imageKey.delete()
         return request
 
@@ -86,3 +107,27 @@ class ComputeTrainingApi(remote.Service):
     def getUploadUrl(self, unused_request):
         upload_url = blobstore.create_upload_url('/upload_photo')
         return BlobstoreUploadURL(url=upload_url)
+
+
+    # Pass a logging message through to the logger
+    @endpoints.method(
+        LogMessage,
+        LogMessage,
+        path='logging',
+        http_method='POST',
+        name='logging.put')
+    def logMessage(self, request):
+        message = request.message
+        level = request.level
+        if(level == 0):
+            logging.critical(message)
+        elif(level == 1):
+            logging.error(message)
+        elif(level == 2):
+            logging.warning(message)
+        elif(level == 3):
+            logging.info(message)
+        else:
+            logging.info("Couldn't read the logging level.  Message is:")
+            logging.info(message)
+        return request

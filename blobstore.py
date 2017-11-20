@@ -1,4 +1,4 @@
-# Copyright 2015 Google Inc. All rights reserved.
+# Copyright 2017 Google Inc. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,35 +14,17 @@
 
 
 from google.appengine.api import images
-
+from google.appengine.api import taskqueue
+from google.appengine.ext import deferred
 from google.appengine.ext import blobstore
-from google.appengine.ext import ndb
 from google.appengine.ext.webapp import blobstore_handlers
+from Tasks import deferredImageProcessing
 import webapp2
+import logging
 
-from vision import VisionApi
+from Tasks import ImageUpload
 
-
-# Simple datastore model for uploads
-class ImageUpload(ndb.Model):
-    filename = ndb.StringProperty()
-    blob_key = ndb.BlobKeyProperty()
-    img_url = ndb.StringProperty()
-    characteristics = ndb.StringProperty(repeated=True)
-    date_created = ndb.DateTimeProperty(auto_now_add=True)
-
-    def _pre_put_hook(self):
-        self.img_url = '/img?blob_key=' + str(self.blob_key)
-
-        blob_info = blobstore.get(self.blob_key)
-        if blob_info:
-            img = images.Image(blob_key=self.blob_key)
-            img.im_feeling_lucky()
-            vision = VisionApi()
-            response = vision.detect_labels([img.execute_transforms(output_encoding=images.JPEG)])[0]
-            self.characteristics = response
-
-
+# URL generator for file upload
 class PhotoUploadFormHandler(webapp2.RequestHandler):
     def get(self):
 
@@ -59,13 +41,31 @@ class PhotoUploadFormHandler(webapp2.RequestHandler):
 class PhotoUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self):
         #try:
+        deferredSetting = self.request.get('deferred')
+
         upload = self.get_uploads()[0]
         file_info = self.get_file_infos()[0]
 
-        image = ImageUpload(
-            filename=file_info.filename,
-            blob_key=upload.key())
-        image.put()
+        logging.info("Deferred status:"+deferredSetting)
+        if(deferredSetting == 'on'):
+            logging.info('User requesting image processing to be deferred, sending to task queue')
+            # Send the task to the defered queue so we can see it
+            deferred.defer(
+                deferredImageProcessing,
+                file_info.filename,
+                upload.key(),
+                _countdown=30,
+                _queue="default"
+            )
+
+        else:
+            # Process immediately
+            image = ImageUpload(
+                filename=file_info.filename,
+                blob_key=upload.key()
+            )
+            image.renderCharacteristics()
+            image.put()
 
         self.redirect('/')
 
@@ -82,6 +82,7 @@ class ViewPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
 
 
 class Thumbnailer(webapp2.RequestHandler):
+    # Generates and loads a thumbnail of image for viewing
     def get(self):
         blob_key = self.request.get("blob_key")
         if blob_key:
@@ -100,6 +101,7 @@ class Thumbnailer(webapp2.RequestHandler):
         self.error(404)
 
 class ImageLoader(webapp2.RequestHandler):
+    # Loads the full image for viewing
     def get(self):
         blob_key = self.request.get("blob_key")
         if blob_key:
