@@ -1,0 +1,18 @@
+{
+  "name": "compute-training-dev",
+  "description": "Bower configuration for compute training class",
+  "main": "",
+  "authors": [
+    "bduerst@google.com"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

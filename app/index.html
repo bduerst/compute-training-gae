@@ -1,0 +1,177 @@
+<!doctype html>
+<!--
+  Copyright 2017 Brian J. Duerst All rights reserved.
+  This is the main index page for a cat detection app,
+  which is part of a training course for Google Cloud.
+-->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Helps you tell if there is a cat in your photo.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>To Cat or not to Cat?</title>
+
+    <!-- Add to homescreen for Chrome on Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="icon" sizes="192x192" href="/cat.png">
+
+    <!-- Add to homescreen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="To Cat or not to Cat?">
+    <link rel="apple-touch-icon-precomposed" href="cat.png">
+
+    <!-- Tile icon for Win8 (144x144 + tile color) -->
+    <meta name="msapplication-TileImage" content="/img/touch/ms-touch-icon-144x144-precomposed.png">
+    <meta name="msapplication-TileColor" content="#3372DF">
+
+    <link rel="stylesheet" href="/bower_components/material-design-lite/material.min.css">
+    <script src="/bower_components/material-design-lite/material.min.js"></script>
+    <link rel="stylesheet" href="/bower_components/material-design-lite/mdl-selectfield/mdl-selectfield.min.css">
+    <script src="/bower_components/material-design-lite/mdl-selectfield/mdl-selectfield.min.js"></script>
+    <link rel="stylesheet" href="/css/icon.css">
+    <link rel="stylesheet" href="/css/material.blue-deep_orange.min.css"/>
+    <link rel="stylesheet" href="/css/catornotcat.css"/>
+</head>
+<body>
+
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+            <!-- Title -->
+            <span class="mdl-layout-title">Google Cloud | Compute Training</span>
+            <!-- Add spacer, to align navigation to the right -->
+            <div class="mdl-layout-spacer"></div>
+            <!-- Navigation. We hide it in small screens. -->
+
+            <span class="mdl-layout__tab">Instant</span>
+
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
+                  mdl-textfield--floating-label mdl-textfield--align-right">
+                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="switch-1">
+                    <input type="checkbox" id="switch-1" class="mdl-switch__input">
+                    <span class="mdl-switch__label"></span>
+                </label>
+            </div>
+            <span class="mdl-layout__tab">Deferred</span>
+
+
+        </div>
+    </header>
+    <div class="mdl-layout__drawer">
+        <span class="mdl-layout-title">Cat or Not a Cat</span>
+        <nav class="mdl-navigation">
+        <span class="mdl-navigation__link" style="pointer-events:none;">
+           This app will tell you if you have a 😸 cat (or 🚫 not) in your photo.
+        </span>
+
+        </nav>
+        <nav id="show-dialog-nav" class="mdl-navigation" style="cursor:pointer;">
+            <span class="mdl-navigation__link">Add a Photo</span>
+        </nav>
+        <nav id="show-logging-nav" class="mdl-navigation" style="cursor:pointer;">
+            <a class="mdl-navigation__link">Log a Message</a>
+        </nav>
+        <nav class="mdl-navigation">
+            <a class="mdl-navigation__link" target="_blank"
+               href="https://github.com/bduerst/compute-training-gae">Source Code</a>
+        </nav>
+    </div>
+    <main class="mdl-layout__content">
+        <div class="page-content">
+
+            <dialog id="image-dialog" class="mdl-dialog">
+                <h4 class="mdl-dialog__title">Upload Image</h4>
+                <div class="mdl-dialog__content">
+                    <p>
+                        Please upload an image to use with the Vision API. Try to keep it < 2MB in size if
+                        possible.
+                    </p>
+                </div>
+                <div class="mdl-dialog__actions">
+                    <form id="upload-form" action="{0}" method="POST" enctype="multipart/form-data">
+                        <input type="file" id="file" name="file">
+                        <div>
+                            <input class="mdl-textfield__input image-input" placeholder="File" type="text"
+                                   id="uploadFile"
+                                   readonly/>
+
+                            <div style="float:left;"><label id="uploadBtn" for="file"
+                                                            class="pick-file mdl-button mdl-js-button mdl-button--colored">
+                                Pick File
+                            </label>
+                            </div>
+                        </div>
+                        <input id="switch-2" name="deferred" type="checkbox" hidden>
+                        <button type="submit" name="submit" id="submit-button"
+                                class="mdl-button mdl-js-button mdl-button--colored mdl-button--controls submit"
+                                disabled>Submit
+                        </button>
+                        <button type="button" id="close-image-dialog"
+                                class="mdl-button mdl-js-button mdl-button--colored mdl-button--controls close">Close
+                        </button>
+                    </form>
+
+                </div>
+            </dialog>
+
+
+            <dialog id="logging-dialog" class="mdl-dialog" style="height:285px;">
+                <h4 class="mdl-dialog__title">Log a Message</h4>
+                <div class="mdl-dialog__content" style="padding-bottom:10px;">
+                    <p style="margin:0px;">
+                        Select a level and enter a message to send to Stack Driver for logging.
+                    </p>
+                </div>
+                <div class="mdl-dialog__actions">
+                    <form>
+                        <div class="mdl-textfield mdl-js-textfield" style="width:100%;">
+                            <textarea class="mdl-textfield__input" type="text" rows="3"
+                                      id="log-message-field"></textarea>
+                            <label class="mdl-textfield__label" for="log-message-field">Message to log...</label>
+                        </div>
+                        <div class="mdl-selectfield mdl-js-selectfield mdl-selectfield--floating-label"
+                             style="width:150px;">
+                            <select class="mdl-selectfield__select" id="logging-level" name="level">
+                                <option value="3">Info</option>
+                                <option value="2">Warning</option>
+                                <option value="1">Error</option>
+                                <option value="0">Critical</option>
+                            </select>
+                            <label class="mdl-selectfield__label" for="logging-level">Logging Level</label>
+                        </div>
+                        <button type="submit" name="submit" id="logging-submit-button"
+                                class="mdl-button mdl-js-button mdl-button--colored mdl-button--controls submit"
+                                id="logging-submit">Submit
+                        </button>
+                        <button type="button" id="close-logging-dialog"
+                                class="mdl-button mdl-js-button mdl-button--colored mdl-button--controls close">Close
+                        </button>
+
+                    </form>
+                </div>
+            </dialog>
+
+            <div id="container"/>
+            <div id="spinner-container" class="mdl-grid center-items"
+                 style="display:flex;align-items:center;height:200px;">
+                <div class="mdl-layout-spacer"></div>
+                <div class="mdl-spinner mdl-js-spinner is-active"></div>
+                <div class="mdl-layout-spacer"></div>
+            </div>
+        </div>
+        <!-- Colored FAB button -->
+        <button id="show-dialog" class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored show-dialog"
+                style="position:fixed;">
+            <i class="material-icons">add</i>
+        </button>
+
+</div>
+</main>
+</div>
+
+</body>
+<script src="app.js"></script>
+<script src="https://apis.google.com/js/client.js?onload=init"></script>
+</html>
