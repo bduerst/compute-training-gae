@@ -1,18 +1,3 @@
-# Copyright 2017 Google Inc. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
 from google.appengine.api import images
 from google.appengine.api import taskqueue
 from google.appengine.ext import deferred
@@ -49,7 +34,7 @@ class PhotoUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
         logging.info("Deferred status:"+deferredSetting)
         if(deferredSetting == 'on'):
             logging.info('User requesting image processing to be deferred, sending to task queue')
-            # Send the task to the defered queue so we can see it
+            # Send the task to the defered queue so we can see it in the console
             deferred.defer(
                 deferredImageProcessing,
                 file_info.filename,
